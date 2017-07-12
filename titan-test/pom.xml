@@ -7,13 +7,13 @@
 	<description>To demonstrate the Titan index problem: https://github.com/thinkaurelius/titan/issues/788</description>
 
 	<properties>
-		<maven.compiler.version>3.1</maven.compiler.version>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.version>3.3</maven.compiler.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<titan.version>0.5.1</titan.version>
-		<junit.version>4.11</junit.version>
-		<slf4j-api.version>1.7.7</slf4j-api.version>
+		<titan.version>1.0.0</titan.version>
+		<junit.version>4.12</junit.version>
+		<slf4j-api.version>1.7.5</slf4j-api.version>
 		<logback-classic.version>1.1.2</logback-classic.version>
 	</properties>
 

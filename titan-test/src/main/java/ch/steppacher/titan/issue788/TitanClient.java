@@ -12,18 +12,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.thinkaurelius.titan.core.TitanGraph;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
+
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 public class TitanClient {
 
 	private static final Logger	LOG		= LoggerFactory.getLogger(TitanClient.class);
 
 	private final TitanGraph	graph;
+	private final GraphTraversalSource g;
 
-	public TitanClient(final TitanGraph titanGraph) {
+	public TitanClient(final TitanGraph titanGraph, final GraphTraversalSource gts) {
 		this.graph = titanGraph;
+		this.g = gts;
 	}
 
 	public void deleteAllOutdated(final long cutOffTime) {
@@ -32,39 +37,42 @@ public class TitanClient {
 			LOG.info("Deleting all vertices and edges that have not been touched before " + df.format(new Date(cutOffTime)));
 
 			// Delete edges
-			Iterator<Edge> edges = BlueprintsUtil.getEdgesNotModifiedSince(graph, cutOffTime).iterator();
+			Iterator<Edge> edges = BlueprintsUtil.getEdgesNotModifiedSince(g, cutOffTime).iterator();
 			Set<Object> edgeIds = new HashSet<>();
 			while (edges.hasNext()) {
 				Edge edge = edges.next();
-				edgeIds.add(edge.getId());
-				LOG.info("Deleting outdated edge from graph: " + edge + "; updated at " + df.format(edge.getProperty("UPDATED_AT")));
+				edgeIds.add(edge.id());
+				LOG.info("Deleting outdated edge from graph: " + edge + "; updated at " + df.format(edge.value("UPDATED_AT")));
 			}
 			for (Object edgeId : edgeIds) {
 				deleteEdgeById(edgeId);
 			}
 
 			// Delete vertices
-			Iterator<Vertex> vertices = BlueprintsUtil.getVerticesNotModifiedSince(graph, cutOffTime).iterator();
+			Iterator<Vertex> vertices = BlueprintsUtil.getVerticesNotModifiedSince(g, cutOffTime).iterator();
 			Set<String> vertexUUIDs = new HashSet<>();
 			while (vertices.hasNext()) {
 				Vertex vertex = vertices.next();
-				vertexUUIDs.add((String) vertex.getProperty("UUID"));
-				LOG.info("Deleting outdated vertex from graph: " + vertex + ", " + vertex.getProperty("label") + ";  updated at " + (vertex.getProperty("UPDATED_AT") != null ? df.format(vertex.getProperty("UPDATED_AT")) : "n/a"));
+				vertexUUIDs.add((String) vertex.value("UUID"));
+				LOG.info("Deleting outdated vertex from graph: " + vertex + ", " + vertex.label() + ";  ");
+				Long updatedAt = vertex.value("UPDATED_AT");
+				LOG.info("updated at " + (updatedAt != null ? df.format(new Date(updatedAt)) : "n/a"));
 			}
 			for (String uuid : vertexUUIDs) {
 				deleteVertexByUUID(UUID.fromString(uuid));
 			}
 
-			graph.commit();
+			graph.tx().commit();
 		} catch (Exception e) {
-			graph.rollback();
+			graph.tx().rollback();
 			throw new RuntimeException("Failed to delete outdated edge or vertex.", e);
 		}
 	}
 
 	private void deleteEdgeById(final Object id) {
-		Edge poorSoul = graph.getEdge(id);
-		if (poorSoul != null) {
+		Iterator<Edge> t = graph.edges(id);
+		if (t.hasNext()) {
+			Edge poorSoul = t.next();
 			LOG.debug("Deleting edge " + poorSoul);
 			poorSoul.remove();
 		}
@@ -72,7 +80,7 @@ public class TitanClient {
 			LOG.warn("Cannot delete. Edge with ID " + id + " could not be found in graph.");
 		}
 	}
-	
+
 	private void deleteVertexByUUID(final UUID uuid) {
 		Vertex poorSoul = loadVertex(uuid);
 		if (poorSoul != null) {
@@ -82,28 +90,29 @@ public class TitanClient {
 			LOG.warn("Cannot delete. Entry with UUID '" + uuid + "' could not be found in graph.");
 		}
 	}
-	
+
 	private Vertex loadVertex(final UUID entryUUID) {
 		return loadVertex(entryUUID.toString(), "UUID");
 	}
-	
+
 	private Vertex loadVertex(final String id, final String idProperty) {
 		Vertex result = null;
-		Iterator<Vertex> verteces = graph.getVertices(idProperty, id).iterator();
+		Iterator<Vertex> vertices = g.V().has(idProperty, id).toList().iterator();
 
-		if (verteces.hasNext()) {
-			result = verteces.next();
-			if (verteces.hasNext()) {
+		if (vertices.hasNext()) {
+			result = vertices.next();
+			if (vertices.hasNext()) {
 				throw new IllegalStateException("Found more than one vertex for " + idProperty + " '" + id + "'! Graph is not consistent.");
 			}
 		}
 
 		return result;
 	}
-	
+
 	private void deleteVertex(Vertex poorSoul) {
-		Iterable<Edge> edges = poorSoul.getEdges(Direction.BOTH);
-		for (Edge edge : edges) {
+		Iterator<Edge> edges = poorSoul.edges(Direction.BOTH);
+		while (edges.hasNext()) {
+			Edge edge = edges.next();
 			LOG.debug("Deleting edge " + edge);
 			edge.remove();
 		}
