@@ -11,9 +11,9 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<titan.version>1.0.0</titan.version>
+		<janusgraph.version>0.1.1</janusgraph.version>
 		<junit.version>4.12</junit.version>
-		<slf4j-api.version>1.7.5</slf4j-api.version>
+		<slf4j-api.version>1.7.12</slf4j-api.version>
 		<logback-classic.version>1.1.2</logback-classic.version>
 	</properties>
 
@@ -48,21 +48,21 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.thinkaurelius.titan</groupId>
-			<artifactId>titan-core</artifactId>
-			<version>${titan.version}</version>
+			<groupId>org.janusgraph</groupId>
+			<artifactId>janusgraph-core</artifactId>
+			<version>${janusgraph.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.thinkaurelius.titan</groupId>
-			<artifactId>titan-berkeleyje</artifactId>
-			<version>${titan.version}</version>
+			<groupId>org.janusgraph</groupId>
+			<artifactId>janusgraph-berkeleyje</artifactId>
+			<version>${janusgraph.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.thinkaurelius.titan</groupId>
-			<artifactId>titan-lucene</artifactId>
-			<version>${titan.version}</version>
+			<groupId>org.janusgraph</groupId>
+			<artifactId>janusgraph-lucene</artifactId>
+			<version>${janusgraph.version}</version>
 		</dependency>
 
 		<dependency>

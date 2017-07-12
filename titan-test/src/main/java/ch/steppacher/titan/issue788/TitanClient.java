@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thinkaurelius.titan.core.TitanGraph;
+import org.janusgraph.core.JanusGraph;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -23,10 +23,10 @@ public class TitanClient {
 
 	private static final Logger	LOG		= LoggerFactory.getLogger(TitanClient.class);
 
-	private final TitanGraph	graph;
+	private final JanusGraph	graph;
 	private final GraphTraversalSource g;
 
-	public TitanClient(final TitanGraph titanGraph, final GraphTraversalSource gts) {
+	public TitanClient(final JanusGraph titanGraph, final GraphTraversalSource gts) {
 		this.graph = titanGraph;
 		this.g = gts;
 	}

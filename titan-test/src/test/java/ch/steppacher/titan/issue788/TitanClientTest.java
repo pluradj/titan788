@@ -23,13 +23,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thinkaurelius.titan.core.Cardinality;
-import com.thinkaurelius.titan.core.Multiplicity;
-import com.thinkaurelius.titan.core.PropertyKey;
-import com.thinkaurelius.titan.core.TitanFactory;
-import com.thinkaurelius.titan.core.TitanGraph;
-import com.thinkaurelius.titan.core.schema.TitanManagement;
-import com.thinkaurelius.titan.graphdb.relations.RelationIdentifier;
+import org.janusgraph.core.Cardinality;
+import org.janusgraph.core.Multiplicity;
+import org.janusgraph.core.PropertyKey;
+import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.graphdb.relations.RelationIdentifier;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -54,7 +54,7 @@ public class TitanClientTest {
 	private static String				PAT_ID_2	= "201";
 	private static String				PAT_ID_3	= "202";
 
-	private static TitanGraph			graph;
+	private static JanusGraph			graph;
 	private static GraphTraversalSource	g;
 	private static TitanClient			titanClient;
 
@@ -72,7 +72,7 @@ public class TitanClientTest {
 		CONFIG.addProperty("index.locallucene.backend", "lucene");
 		CONFIG.addProperty("index.locallucene.directory", System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "searchindex-test");
 
-		graph = TitanFactory.open(CONFIG);
+		graph = JanusGraphFactory.open(CONFIG);
 		g = graph.traversal();
 		titanClient = new TitanClient(graph, g);
 
@@ -275,7 +275,7 @@ public class TitanClientTest {
 		}
 	}
 
-	private static void createSchema(TitanManagement tm) {
+	private static void createSchema(JanusGraphManagement tm) {
 		tm.makeVertexLabel("ORG").make();
 		tm.makeVertexLabel("HP").make();
 		tm.makeVertexLabel("PATIENT").make();
